@@ -209,3 +209,4 @@ __marimo__/
 deep_rag_frontend_vue/*
 vector_db/*
 md_guides/*
+scripts/requirements.py

@@ -2,7 +2,7 @@ import subprocess
 import typer
 from pathlib import Path
 
-from ...config import settings
+from ..config import settings
 
 app = typer.Typer(help="Export Nemotron 12B text-only to GGUF via llama.cpp into MODEL_DIR/gguf.")
 
@@ -31,4 +31,4 @@ def main(
     print(f"Saved GGUF to {out}")
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)

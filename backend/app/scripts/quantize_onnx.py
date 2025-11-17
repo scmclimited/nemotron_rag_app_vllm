@@ -2,7 +2,7 @@ import typer
 from pathlib import Path
 from onnxruntime.quantization import quantize_dynamic, QuantType
 
-from ...config import settings
+from ..config import settings
 
 app = typer.Typer(help="Quantize ONNX to INT8 under MODEL_DIR/onnx.")
 
@@ -31,4 +31,4 @@ def main(
     print(f"Quantized INT8 model saved to {out_path}")
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)

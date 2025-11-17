@@ -2,7 +2,7 @@ import typer
 from pathlib import Path
 from huggingface_hub import snapshot_download
 
-from ...config import settings
+from backend.app.config import settings
 
 app = typer.Typer(help="Download Nemotron models from Hugging Face using MODEL_DIR.")
 
@@ -26,10 +26,9 @@ def main(variant: str = typer.Option("vl-fp8", help="vl-fp8 or text-bf16")):
     snapshot_download(
         repo_id=model_id,
         local_dir=str(out_dir),
-        local_dir_use_symlinks=False,
     )
 
     typer.echo("Done.")
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
