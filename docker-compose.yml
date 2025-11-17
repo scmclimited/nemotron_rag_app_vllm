@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  vector_db:
+    image: postgres:16
+    container_name: nemotron_rag_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-deep_rag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deep_rag}
+      POSTGRES_DB: ${POSTGRES_DB:-deep_rag}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  vllm:
+    build:
+      context: .
+      dockerfile: Dockerfile.vllm
+    container_name: nemotron_rag_vllm
+    restart: unless-stopped
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN:-}
+      - NEMOTRON_VL_MODEL_ID=${NEMOTRON_VL_MODEL_ID}
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+    volumes:
+      - ./backend_models:/models
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: nemotron_rag_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - INFERENCE_MODE=${INFERENCE_MODE}
+      - GPU_OFFLOAD_FRACTION=${GPU_OFFLOAD_FRACTION}
+      - VLLM_BASE_URL=http://vllm:8000/v1
+    depends_on:
+      - vector_db
+      - vllm
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./backend_models:/app/backend_models
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: nemotron_rag_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    volumes:
+      - ./deep_rag_frontend_vue:/app
+
+volumes:
+  pg_data:

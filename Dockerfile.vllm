@@ -1,0 +1,10 @@
+FROM vllm/vllm-openai:latest
+
+ENV NEMOTRON_VL_MODEL_ID=${NEMOTRON_VL_MODEL_ID:-nvidia/NVIDIA-Nemotron-Nano-12B-v2-VL-FP8}
+
+CMD ["python3", "-m", "vllm.entrypoints.openai.api_server", \
+     "--model", "nvidia/NVIDIA-Nemotron-Nano-12B-v2-VL-FP8", \
+     "--trust-remote-code", \
+     "--quantization", "modelopt", \
+     "--host", "0.0.0.0", \
+     "--port", "8000"]
