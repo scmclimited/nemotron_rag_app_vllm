@@ -2,7 +2,7 @@
 name = "nemotron-rag-app"
 version = "0.1.0"
 description = "Local Nemotron VL RAG pipeline extending deep_rag with LangGraph and vLLM."
-authors = [{ name = "Omar (SCMC Limited)", email = "example@example.com" }]
+authors = [{ name = "Omar (SCMC Limited)", email = "omoral02@live.com" }]
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115.0",

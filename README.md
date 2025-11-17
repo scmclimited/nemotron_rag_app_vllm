@@ -1,4 +1,4 @@
-# Nemotron VL Local RAG – LangGraph + deep_rag Frontend
+# (WIP) Nemotron VL Local RAG – LangGraph + deep_rag Frontend
 
 This repository is a **local, multi-modal RAG playground** that extends the ideas in
 [`scmclimited/deep_rag`](https://github.com/scmclimited/deep_rag) to support:
@@ -29,7 +29,7 @@ flowchart LR
 
     subgraph LLMBackends["LLM Backends (configurable)"]
         VLLM_F["vLLM + Nemotron VL FP8\n(GPU, 4080 – 16GB)"]
-        VLLM_4["vLLM + text-only 4‑bit model\n(AWQ / GPTQ, GPU)"]
+        VLLM_4["vLLM + text-only 4-bit model\n(AWQ / GPTQ, GPU)"]
         GGUF["llama.cpp + Nemotron 12B GGUF\n(Q4_K_M / Q6_K, CPU or CPU+offload)"]
     end
 
@@ -38,7 +38,7 @@ flowchart LR
     G -->|"embed / search"| VDB
     G -->|"generate answer"| VLLM_F
     G -->|"fallback / heavy context"| GGUF
-    G -->|"high‑throughput text-only"| VLLM_4
+    G -->|"high-throughput text-only"| VLLM_4
 ```
 
 The **vector DB** and **UI** are conceptually the same as in `deep_rag`:
@@ -81,6 +81,43 @@ The backend code uses **environment variables** to decide:
 - Which **LLM backend** is primary (Nemotron VL FP8 vs text-only vs GGUF).
 - How much **GPU offload** to perform in GGUF mode (if enabled).
 - Whether **RAG** calls use VL (for images) or text-only embeddings.
+
+---
+### 2.3 Model Storage: `MODEL_DIR`
+
+All model downloads, ONNX exports, and GGUF conversions are routed
+through a single environment variable:
+
+```bash
+MODEL_DIR="D:/Models"
+```
+
+- On Windows Git Bash / MSYS2, prefer forward slashes (`D:/Models`).
+- On Linux/macOS, use a normal unix path (`/mnt/models`, `/data/models`, etc.).
+
+By default, if `MODEL_DIR` is not set, the code assumes:
+
+```text
+D:/Models
+```
+
+### Directory layout (recommended)
+
+When you run the provided scripts and Make targets, you’ll end up with a layout like:
+
+```text
+D:/Models/
+├── nemotron_vl_fp8/            # Nemotron VL FP8 checkpoint (vLLM-friendly)
+├── nemotron_text_12b/          # Text-only Nemotron 12B
+├── onnx/
+│   └── nemotron_12b_bf16.onnx  # ONNX export
+│   └── nemotron_12b_int8.onnx  # INT8 quantized ONNX
+└── gguf/
+    └── nemotron_12b_q4_k_m.gguf  # GGUF Q4_K_M for llama.cpp
+```
+
+You can change subdirectory names by adjusting script arguments if desired.
+
 
 ---
 
@@ -207,33 +244,47 @@ Because different nodes have different sensitivity to precision, we recommend:
 ```text
 nemotron_rag_app/
 ├── backend/
-│   └── app/
-│       ├── main.py                 # FastAPI app, OpenAI-style endpoints
-│       ├── config.py               # Settings (model ids, modes, DB URL)
-│       ├── inference/
-│       │   ├── router.py           # Chooses vLLM vs GGUF backends
-│       │   ├── vllm_client.py      # Nemotron VL / text-only client
-│       │   ├── llama_cpp_client.py # Optional GGUF backend over HTTP
-│       │   └── model_conversion.py # HF → ONNX / INT8 / GGUF helpers
-│       ├── rag/
-│       │   ├── graph.py            # LangGraph RAG graph construction
-│       │   ├── nodes.py            # Node implementations (planner, etc.)
-│       │   ├── embeddings.py       # Nemotron VL multi-modal embeddings
-│       │   └── vectorstore.py      # Thin wrapper over deep_rag vector_db
-│       └── api/
-│           ├── chat.py             # /v1/chat/completions
-│           └── rag.py              # /rag/query
+│ └── app/
+│ ├── api/
+│ │ ├── chat.py # /v1/chat/completions (OpenAI-style)
+│ │ └── rag.py # /rag/query (full RAG endpoint)
+│ ├── inference/
+│ │ ├── router.py # Chooses between vLLM, GGUF, or ONNX backends
+│ │ ├── vllm_client.py # vLLM client for Nemotron VL FP8 / text models
+│ │ └── llama_cpp_client.py # Optional llama.cpp/GGUF client
+│ ├── rag/
+│ │ ├── embeddings.py # Multi-modal embedding node (Nemotron-VL)
+│ │ ├── graph.py # LangGraph RAG graph assembler
+│ │ ├── nodes.py # Planner, retriever, compressor, critic, etc.
+│ │ └── vectorstore.py # Wrapper over deep_rag’s pgvector schema
+│ ├── scripts/
+│ │ ├── download_model.py # MODEL_DIR-aware Nemotron download
+│ │ ├── export_onnx.py # Export text model → ONNX
+│ │ ├── quantize_onnx.py # Quantize ONNX → INT8
+│ │ └── export_gguf.py # Convert HF → GGUF (through llama.cpp)
+│ ├── config.py # Settings (MODEL_DIR, DB URL, inference mode)
+│ └── main.py # FastAPI entrypoint
+│
+├── deep_rag_frontend_vue/ # Vue UI copied from scmclimited/deep_rag
+│ # (multi-file upload, threads, chat UI)
+├── vector_db/ # deep_rag Postgres + pgvector schema
+│ # (same structure as original deep_rag repo)
+│
 ├── scripts/
-│   ├── setup_deep_rag_assets.sh    # Clones/copies frontend + vector_db from deep_rag
-│   ├── download_model.py           # Downloads Nemotron VL / text-only variants
-│   └── quantize_model.py           # CLI to run ONNX / GGUF conversion flows
-├── docker-compose.yml              # Orchestrates DB + backend + optional frontend + vLLM
-├── Dockerfile.backend              # Backend build
-├── Dockerfile.frontend             # Frontend build (once copied from deep_rag)
-├── Dockerfile.vllm                 # vLLM OpenAI-style server
-├── Makefile                        # Simple dev/ops scripts
-├── pyproject.toml                  # Python dependencies + CLI entry points
-└── README.md                       # This file
+│ └── setup_deep_rag_assets.sh # Syncs deep_rag UI + DB assets into project
+│
+├── md_guides/ # Documentation (formulas, retrieval math, etc.)
+│
+├── .env.example # MODEL_DIR=D:/Models + DB + RAG settings
+├── Makefile # MODEL_DIR-aware download/quantization tasks
+├── docker-compose.yml # vLLM server + backend + frontend + pgvector
+├── Dockerfile.backend # Builds backend service
+├── Dockerfile.frontend # Builds Vue UI (deep_rag)
+├── Dockerfile.vllm # Runs Nemotron VL inside vLLM
+│
+├── pyproject.toml # Python deps, backends, LangGraph, Typer scripts
+├── LICENSE
+└── README.md # Top-level documentation
 ```
 
 ---
@@ -273,19 +324,52 @@ That script will:
 
 ### 8.1 Prerequisites
 
-- Python **3.11+**
+- Python **3.13+**
 - Docker + Docker Compose
 - NVIDIA GPU drivers + `nvidia-container-toolkit` (for vLLM GPU containers)
 - `make`
 - (optional) a checkout of `llama.cpp` if you plan on **GGUF conversion**.
 
-### 8.2 Python env (backend only)
+### 8.2 Env & MODEL_DIR Quickstart
+
+1. Copy the env template:
+
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env`:
+
+```dotenv
+MODEL_DIR=D:/Models
+# other DB + RAG settings...
+```
+
+3. In shells where you call the model tools directly, you can also export:
+
+```bash
+export MODEL_DIR="D:/Models"
+```
+
+The backend’s `Settings` class will normalize `MODEL_DIR` and derive default paths
+for ONNX and GGUF artifacts from it, unless you explicitly override them in `.env`.
+
+
+### 8.3 Python env (backend only)
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -U pip
 pip install -e .
+```
+
+Conda alternative
+
+```bash
+conda -n nemotron python=3.13
+conda activate nemotron
+
 ```
 
 This uses the `pyproject.toml` configuration at the repo root.
@@ -299,7 +383,7 @@ All of these flows are implemented as Python CLIs hooked via `pyproject.toml` an
 ### 9.1 Download Nemotron VL FP8 for vLLM
 
 ```bash
-make download-model-vl-fp8
+MODEL_DIR="D:/Models" make download-model-vl-fp8
 ```
 
 This runs:
@@ -317,7 +401,7 @@ Which is a thin wrapper around:
 ### 9.2 Export text-only Nemotron 12B to ONNX + INT8
 
 ```bash
-make export-onnx-int8
+MODEL_DIR="D:/Models" make export-onnx-int8
 ```
 
 Which maps to:
@@ -337,7 +421,7 @@ These CLIs:
 ### 9.3 Convert text-only Nemotron 12B to GGUF
 
 ```bash
-make export-gguf-q4
+MODEL_DIR="D:/Models" make export-gguf-q4
 ```
 
 Which expects that you have:
