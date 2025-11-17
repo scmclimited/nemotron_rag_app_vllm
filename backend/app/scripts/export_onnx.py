@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.onnx import export
 from transformers.onnx.features import FeaturesManager
 
-from ...config import settings
+from ..config import settings
 
 app = typer.Typer(help="Export text-only Nemotron to ONNX under MODEL_DIR/onnx.")
 
@@ -39,4 +39,4 @@ def main(precision: str = typer.Option("bf16", help="bf16 or fp16")):
     print(f"Exported ONNX to {onnx_out}")
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)

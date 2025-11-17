@@ -21,6 +21,16 @@ app.include_router(rag.router, prefix="")
 async def health():
     return {
         "status": "ok",
+        "temperature_chat": settings.temperature_chat,
         "inference_mode": settings.inference_mode,
         "vllm_base_url": settings.vllm_base_url,
+        "model_dir": settings.model_dir,
+        "nemotron_vl_model_id": settings.nemotron_vl_model_id,
+        "nemotron_text_model_id": settings.nemotron_text_model_id,
+        "database_url": settings.database_url,
+        "k_retriever": settings.k_retriever,
+        "k_vec": settings.k_vec,
+        "k_lex": settings.k_lex,
+        "synthesizer_conf_threshold_default": settings.synthesizer_conf_threshold_default,
+        "synthesizer_conf_threshold_explicit_selection": settings.synthesizer_conf_threshold_explicit_selection,
     }

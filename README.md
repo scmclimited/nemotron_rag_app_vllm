@@ -361,7 +361,9 @@ for ONNX and GGUF artifacts from it, unless you explicitly override them in `.en
 python -m venv .venv
 source .venv/bin/activate
 pip install -U pip
-pip install -e .
+pip install -e ./backend/
+pip install -r requirements.txt
+
 ```
 
 Conda alternative
@@ -427,6 +429,13 @@ MODEL_DIR="D:/Models" make export-gguf-q4
 Which expects that you have:
 
 - `llama.cpp` cloned in `./tools/llama.cpp`,
+
+```bash
+git clone https://github.com/ggerganov/llama.cpp.git tools/llama.cpp`
+
+pip install -r tools/llama.cpp/requirements.txt
+
+```
 - Its Python dependencies installed.
 
 It then runs something like:

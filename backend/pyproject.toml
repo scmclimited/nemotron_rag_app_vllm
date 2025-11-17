@@ -1,0 +1,29 @@
+[project]
+name = "nemotron-rag-app-vllm"
+version = "0.1.0"
+description = "Local Nemotron VL RAG pipeline extending deep_rag with LangGraph and vLLM."
+authors = [{ name = "Omar (SCMC Limited)", email = "omoral02@live.com" }]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi==0.121.2",
+    "httpx==0.28.1",
+    "huggingface-hub==0.36.0",
+    "langgraph==1.0.3",
+    "onnxruntime==1.23.2",
+    "pydantic==2.11.5",
+    "pydantic_settings==2.12.0",
+    "torch==2.9.1",
+    "transformers==4.57.1",
+    "typer==0.20.0",
+    "setuptools==80.9.0"
+]
+
+[project.scripts]
+nemotron-download = "app.scripts.download_model:app"
+nemotron-export-onnx = "app.scripts.export_onnx:app"
+nemotron-quantize-onnx = "app.scripts.quantize_onnx:app"
+nemotron-export-gguf = "app.scripts.export_gguf:app"
+
+[build-system]
+requires = ["setuptools>=69.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
