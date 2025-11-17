@@ -1,0 +1,11 @@
+FROM node:20-alpine as build
+
+WORKDIR /app
+COPY deep_rag_frontend_vue ./deep_rag_frontend_vue
+WORKDIR /app/deep_rag_frontend_vue
+
+RUN npm install && npm run build
+
+FROM nginx:1.27-alpine
+COPY --from=build /app/deep_rag_frontend_vue/dist /usr/share/nginx/html
+EXPOSE 80
