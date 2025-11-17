@@ -4,7 +4,7 @@ from pathlib import Path
 
 from ...config import settings
 
-app = typer.Typer(help="Export Nemotron 12B text-only to GGUF via llama.cpp.")
+app = typer.Typer(help="Export Nemotron 12B text-only to GGUF via llama.cpp into MODEL_DIR/gguf.")
 
 @app.command()
 def main(
@@ -15,7 +15,10 @@ def main(
     hf_id = hf_id or settings.nemotron_text_model_id
     llama_cpp = Path(llama_cpp_path)
     script = llama_cpp / "convert-hf-to-gguf.py"
-    out = Path("backend_models") / f"nemotron_12b_{quant}.gguf"
+
+    gguf_dir = Path(settings.model_dir) / "gguf"
+    gguf_dir.mkdir(parents=True, exist_ok=True)
+    out = gguf_dir / f"nemotron_12b_{quant}.gguf"
 
     cmd = [
         "python", str(script),
@@ -23,9 +26,9 @@ def main(
         "--outfile", str(out),
         "--outtype", quant,
     ]
-    typer.echo(f"Running: {' '.join(cmd)}")
+    print(f"Running: {' '.join(cmd)}")
     subprocess.run(cmd, check=True)
-    typer.echo(f"Saved GGUF to {out}")
+    print(f"Saved GGUF to {out}")
 
 if __name__ == "__main__":
     main()

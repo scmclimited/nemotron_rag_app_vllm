@@ -11,15 +11,12 @@ git clone --depth 1 "$REPO_URL" "$TMP_DIR"
 
 echo "[*] Copying vector_db/ and deep_rag_frontend_vue/ ..."
 rm -rf "$WORKDIR/vector_db" "$WORKDIR/deep_rag_frontend_vue"
-cp -R "$TMP_DIR/vector_db" "$WORKDIR/vector_db"
-cp -R "$TMP_DIR/deep_rag_frontend_vue" "$WORKDIR/deep_rag_frontend_vue"
+cp -R "$TMP_DIR/vector_db" "../$WORKDIR/vector_db"
+cp -R "$TMP_DIR/deep_rag_frontend_vue" "../$WORKDIR/deep_rag_frontend_vue"
 
 echo "[*] Optionally copy md_guides/ and .env.example if needed ..."
 if [ -d "$TMP_DIR/md_guides" ]; then
-  cp -R "$TMP_DIR/md_guides" "$WORKDIR/md_guides"
-fi
-if [ -f "$TMP_DIR/.env.example" ]; then
-  cp "$TMP_DIR/.env.example" "$WORKDIR/.env.deep_rag.example"
+  cp -R "$TMP_DIR/md_guides" "../$WORKDIR/md_guides"
 fi
 
 echo "[*] Cleaning up ..."
