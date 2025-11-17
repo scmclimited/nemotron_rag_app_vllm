@@ -16,18 +16,23 @@ download-model-vl-fp8:
 
 
 export-onnx-int8:
-	python -m backend.app.scripts.export_onnx --precision bf16
-	python -m backend.app.scripts.quantize_onnx --precision int8
+	$(PYTHON) -m backend.app.scripts.export_onnx --precision bf16
+	$(PYTHON) -m backend.app.scripts.quantize_onnx --precision int8
 
 export-gguf-q4:
 	$(PYTHON) -m backend.app.scripts.export_gguf --quant q4_k_m
+
+install-llama-cpp:
+	git clone --depth 1 https://github.com/ggerganov/llama.cpp.git tools/llama.cpp
+	pip install -r tools/llama.cpp/requirements.txt
+	pip install -e tools/llama.cpp
 
 # Generate a requirements.txt file by scanning imported modules in the source
 # tree.  This target calls the generate_requirements.py utility and writes
 # requirements.txt into the project root.  The source directory can be
 # overridden via ``SRC`` variable if needed (default: backend/app).
 gen-reqs:
-	python scripts/requirements.py --src backend/app --output ./requirements.txt
+	$(PYTHON) scripts/requirements.py --src backend/app --output ./requirements.txt
 
 up:
 	INFERENCE_MODE=$(INFERENCE_MODE) GPU_OFFLOAD_FRACTION=$(GPU_OFFLOAD_FRACTION) docker compose up --build

@@ -14,7 +14,7 @@ def main(
 ):
     hf_id = hf_id or settings.nemotron_text_model_id
     llama_cpp = Path(llama_cpp_path)
-    script = llama_cpp / "convert-hf-to-gguf.py"
+    script = llama_cpp / "convert_hf_to_gguf.py"
 
     gguf_dir = Path(settings.model_dir) / "gguf"
     gguf_dir.mkdir(parents=True, exist_ok=True)

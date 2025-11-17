@@ -341,14 +341,14 @@ cp .env.example .env
 2. Edit `.env`:
 
 ```dotenv
-MODEL_DIR=D:/Models
+MODEL_DIR="/mnt/d/Models"
 # other DB + RAG settings...
 ```
 
 3. In shells where you call the model tools directly, you can also export:
 
 ```bash
-export MODEL_DIR="D:/Models"
+export MODEL_DIR="/mnt/d/Models"
 ```
 
 The backend’s `Settings` class will normalize `MODEL_DIR` and derive default paths
@@ -385,7 +385,7 @@ All of these flows are implemented as Python CLIs hooked via `pyproject.toml` an
 ### 9.1 Download Nemotron VL FP8 for vLLM
 
 ```bash
-MODEL_DIR="D:/Models" make download-model-vl-fp8
+MODEL_DIR="/mnt/d/Models" make download-model-vl-fp8
 ```
 
 This runs:
@@ -403,7 +403,7 @@ Which is a thin wrapper around:
 ### 9.2 Export text-only Nemotron 12B to ONNX + INT8
 
 ```bash
-MODEL_DIR="D:/Models" make export-onnx-int8
+MODEL_DIR="/mnt/d/Models" make export-onnx-int8
 ```
 
 Which maps to:
@@ -411,7 +411,7 @@ Which maps to:
 ```bash
 nemotron-export-onnx --precision bf16   --out backend_models/nemotron_12b_bf16.onnx
 
-nemotron-quantize-onnx --in backend_models/nemotron_12b_bf16.onnx   --out backend_models/nemotron_12b_int8.onnx
+nemotron-quantize-onnx --in backend_models/nemotron_12b_bf16.onnx   --out /mnt/d/Models/nemotron_12b_int8.onnx
 ```
 
 These CLIs:
@@ -423,25 +423,30 @@ These CLIs:
 ### 9.3 Convert text-only Nemotron 12B to GGUF
 
 ```bash
-MODEL_DIR="D:/Models" make export-gguf-q4
+MODEL_DIR="mnt/d/models" make export-gguf-q4
 ```
 
 Which expects that you have:
 
 - `llama.cpp` cloned in `./tools/llama.cpp`,
 
-```bash
-git clone https://github.com/ggerganov/llama.cpp.git tools/llama.cpp`
+Use: `make install-llama-cpp`
 
-pip install -r tools/llama.cpp/requirements.txt
+```bash
+
+# This will perform the following:
+
+- git clone --depth 1 https://github.com/ggerganov/llama.cpp.git tools/llama.cpp
+
+- pip install -r tools/llama.cpp/requirements.txt
 
 ```
 - Its Python dependencies installed.
 
-It then runs something like:
+`make export-gguf-q4`  then runs something like:
 
 ```bash
-nemotron-export-gguf   --hf-id nvidia/NVIDIA-Nemotron-Nano-12B-v2   --llama-cpp ./tools/llama.cpp   --out ./backend_models/nemotron_12b_q4_k_m.gguf   --quant q4_k_m
+nemotron-export-gguf   --hf-id nvidia/NVIDIA-Nemotron-Nano-12B-v2   --llama-cpp-path ./tools/llama.cpp   --out ./Models/nemotron_12b_q4_k_m.gguf   --quant q4_k_m
 ```
 
 > This gives you a **GGUF Q4_K_M** file suitable for CPU-heavy or hybrid inference via `llama.cpp`.
