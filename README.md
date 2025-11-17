@@ -89,16 +89,16 @@ All model downloads, ONNX exports, and GGUF conversions are routed
 through a single environment variable:
 
 ```bash
-MODEL_DIR="D:/Models"
+MODEL_DIR="/mnt/d/Models"
 ```
 
-- On Windows Git Bash / MSYS2, prefer forward slashes (`D:/Models`).
+- On Windows Git Bash / MSYS2, prefer forward slashes (`/mnt/d/Models`).
 - On Linux/macOS, use a normal unix path (`/mnt/models`, `/data/models`, etc.).
 
 By default, if `MODEL_DIR` is not set, the code assumes:
 
 ```text
-D:/Models
+/mnt/d/Models
 ```
 
 ### Directory layout (recommended)
@@ -106,7 +106,7 @@ D:/Models
 When you run the provided scripts and Make targets, you’ll end up with a layout like:
 
 ```text
-D:/Models/
+/mnt/d/Models/
 ├── nemotron_vl_fp8/            # Nemotron VL FP8 checkpoint (vLLM-friendly)
 ├── nemotron_text_12b/          # Text-only Nemotron 12B
 ├── onnx/
@@ -275,7 +275,7 @@ nemotron_rag_app/
 │
 ├── md_guides/ # Documentation (formulas, retrieval math, etc.)
 │
-├── .env.example # MODEL_DIR=D:/Models + DB + RAG settings
+├── .env.example # MODEL_DIR="/mnt/d/Models" + DB + RAG settings
 ├── Makefile # MODEL_DIR-aware download/quantization tasks
 ├── docker-compose.yml # vLLM server + backend + frontend + pgvector
 ├── Dockerfile.backend # Builds backend service
