@@ -9,3 +9,6 @@ torch==2.9.1
 transformers==4.57.1
 typer==0.20.0
 setuptools==80.9.0
+numpy==1.24.3
+psycopg==3.2.1
+python-dotenv==1.0.1
