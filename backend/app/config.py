@@ -2,7 +2,14 @@ import os
 from pydantic_settings import BaseSettings
 from pydantic import AnyUrl
 
-MODEL_DIR = os.getenv("MODEL_DIR", "D:/Models")
+# Embedding configuration
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "clip")  # "clip" or "nemotron"
+CLIP_MODEL = os.getenv("CLIP_MODEL", "openai/clip-vit-large-patch14")
+CLIP_EMBEDDING_DIM = int(os.getenv("CLIP_EMBEDDING_DIM", 768))
+NEMOTRON_EMBEDDING_MODEL = os.getenv("NEMOTRON_EMBEDDING_MODEL", "nvidia-embed-qa-4")
+NEMOTRON_EMBEDDING_DIM = int(os.getenv("NEMOTRON_EMBEDDING_DIM", 1024))
+
+MODEL_DIR = os.getenv("MODEL_DIR", "/mnt/d/Models")
 INFERENCE_MODE = os.getenv("INFERENCE_MODE", "vl_fp8")
 GPU_OFFLOAD_FRACTION = os.getenv("GPU_OFFLOAD_FRACTION", 0.4)
 NEMOTRON_VL_MODEL_ID = os.getenv("NEMOTRON_VL_MODEL_ID", "nvidia/NVIDIA-Nemotron-Nano-12B-v2-VL-FP8")
@@ -16,7 +23,21 @@ SYNTHESIZER_CONF_THRESHOLD_DEFAULT = float(os.getenv("SYNTHESIZER_CONF_THRESHOLD
 SYNTHESIZER_CONF_THRESHOLD_EXPLICIT_SELECTION = float(os.getenv("SYNTHESIZER_CONF_THRESHOLD_EXPLICIT_SELECTION", 0.30))
 TEMPERATURE_CHAT = float(os.getenv("LLM_TEMPERATURE", 0.15))
 MAX_TOKENS_CHAT = int(os.getenv("MAX_TOKENS", 1024))
+MAX_ITERS = int(os.getenv("MAX_ITERS", 5))
+CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", 0.30))
+
+# Model quantization configuration
+MODEL_QUANTIZATION = os.getenv("MODEL_QUANTIZATION", "none")  # "fp8", "bf16", or "none"
+MODEL_DTYPE = os.getenv("MODEL_DTYPE", "float16")  # "float32", "float16", "bfloat16"
+
 class Settings(BaseSettings):
+    # Embedding configuration
+    embedding_model: str = EMBEDDING_MODEL  # "clip" or "nemotron"
+    clip_model: str = CLIP_MODEL
+    clip_embedding_dim: int = CLIP_EMBEDDING_DIM
+    nemotron_embedding_model: str = NEMOTRON_EMBEDDING_MODEL
+    nemotron_embedding_dim: int = NEMOTRON_EMBEDDING_DIM
+
     # Database
     database_url: AnyUrl = DATABASE_URL
 
@@ -46,6 +67,13 @@ class Settings(BaseSettings):
     synthesizer_conf_threshold_explicit_selection: float = SYNTHESIZER_CONF_THRESHOLD_EXPLICIT_SELECTION
     temperature_chat: float = TEMPERATURE_CHAT
     max_tokens_chat: int = MAX_TOKENS_CHAT
+    max_iters: int = MAX_ITERS
+    confidence_threshold: float = CONFIDENCE_THRESHOLD
+    
+    # Model quantization
+    model_quantization: str = MODEL_QUANTIZATION
+    model_dtype: str = MODEL_DTYPE
+    
     class Config:
         env_file = ".env"
         env_prefix = ""
